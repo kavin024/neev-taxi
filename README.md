@@ -38,9 +38,9 @@ docs/                 Architecture, API, operations, security and testing notes
 
 ## Quick start (local)
 
-Requirements: Python 3.12, Node 20+, and optionally Flutter 3.35+ for the mobile
-clients. The development backend ships with an embedded PostgreSQL (`pgserver`),
-so no external database is needed.
+Requirements: Python 3.12, Node 20+, and optionally Flutter 3.47+ (tested with
+3.47.7 / Dart 3.13.5) for the mobile clients. The development backend ships with an
+embedded PostgreSQL (`pgserver`), so no external database is needed.
 
 ```bash
 python3.12 -m venv .venv

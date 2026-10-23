@@ -26,6 +26,12 @@ cd apps/passenger_app   && flutter analyze && flutter test
 cd apps/captain_app     && flutter analyze && flutter test
 ```
 
+Verified locally with Flutter 3.47.7 / Dart 3.13.5: all three packages analyze with
+no issues, all unit/widget tests pass, and both apps produce release web builds
+(`flutter build web --release`). Flutter migration on first `pub get` added generated
+directory exclusions to `analysis_options.yaml` and refreshed six SDK-pinned lockfile
+entries.
+
 End-to-end smoke test (development backend running, freshly seeded data):
 
 ```bash
