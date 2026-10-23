@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: neev_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - run: pip install -r backend/requirements-dev.txt
+      - name: Run pytest
+        working-directory: backend
+        run: python -m pytest -q
+      - name: Verify migrations match metadata
+        working-directory: backend
+        env:
+          NEEV_APP_ENV: test
+          NEEV_SECRET_KEY: ci-only-secret-key-0123456789abcdefghijklmnop
+          NEEV_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/neev_ci
+        run: |
+          python -m alembic upgrade head
+          python -m alembic check
+
+  admin:
+    name: Admin console
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/admin_web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/admin_web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  flutter:
+    name: Flutter clients
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Shared package
+        working-directory: apps/shared_package
+        run: flutter pub get && flutter analyze && flutter test
+      - name: Passenger app
+        working-directory: apps/passenger_app
+        run: flutter pub get && flutter analyze && flutter test
+      - name: Captain app
+        working-directory: apps/captain_app
+        run: flutter pub get && flutter analyze && flutter test

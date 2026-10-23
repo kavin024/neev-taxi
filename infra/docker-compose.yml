@@ -1,0 +1,66 @@
+# Local demonstration stack: PostgreSQL + API + admin console behind nginx.
+# This intentionally runs the API in development mode so sandbox payments,
+# outbox SMS, fixed OTP and demo data work. Do not expose it publicly.
+#
+#   cp .env.example .env && docker compose up --build
+#   console http://localhost:8080  ·  API http://localhost:8080/api/v1
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: neev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neev-local-postgres}
+      POSTGRES_DB: neev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neev -d neev"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NEEV_APP_ENV: development
+      NEEV_DEBUG: "false"
+      NEEV_DATABASE_URL: postgresql+psycopg://neev:${POSTGRES_PASSWORD:-neev-local-postgres}@db:5432/neev
+      NEEV_SECRET_KEY: ${NEEV_SECRET_KEY:-local-demo-only-secret-change-me-0123456789abcdef}
+      NEEV_PUBLIC_BASE_URL: ${NEEV_PUBLIC_BASE_URL:-http://localhost:8080}
+      NEEV_CORS_ORIGINS: http://localhost:${NEEV_ADMIN_PORT:-8080}
+      NEEV_DEV_OTP_ENABLED: "true"
+      NEEV_DEV_OTP_FIXED_CODE: "123456"
+      NEEV_DEV_OTP_RETURN_CODE: "true"
+      NEEV_DEV_AUTO_APPROVE_CAPTAINS: "true"
+      NEEV_DEV_ALLOW_GPS_SIMULATION: "true"
+      NEEV_PAYMENT_PROVIDER: sandbox
+      NEEV_SMS_PROVIDER: outbox
+      NEEV_MAP_PROVIDER: demo
+      NEEV_UPLOAD_DIR: /data/uploads
+      NEEV_RUN_BACKGROUND_JOBS: "true"
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.admin
+    depends_on:
+      - api
+    ports:
+      - "${NEEV_ADMIN_PORT:-8080}:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:
