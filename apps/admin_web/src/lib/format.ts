@@ -33,6 +33,11 @@ export function number(value: number | null | undefined): string {
   return new Intl.NumberFormat('en-IN').format(value);
 }
 
+export function ratingLabel(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '—';
+  return value.toFixed(2);
+}
+
 export function percent(value: number | null | undefined, digits = 0): string {
   if (value === null || value === undefined) return '—';
   return `${value.toFixed(digits)}%`;

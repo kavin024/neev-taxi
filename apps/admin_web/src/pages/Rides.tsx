@@ -21,6 +21,7 @@ import {
   durationLabel,
   money,
   number,
+  ratingLabel,
   relativeTime,
   timeLabel,
   titleCase,
@@ -490,7 +491,7 @@ export function RideDetailPage() {
                     <div className="grow">
                       <div style={{ fontSize: 12.5, fontWeight: 700 }}>{data.captain.name}</div>
                       <div className="tiny muted">
-                        {data.captain.rating.toFixed(2)} ★ · {data.captain.total_trips} trips
+                        {ratingLabel(data.captain.rating)} ★ · {data.captain.total_trips} trips
                       </div>
                     </div>
                     <Link

@@ -19,7 +19,7 @@ import {
   Tag,
 } from '../components/ui';
 import type { Paginated, PassengerDetail, PassengerRow } from '../lib/types';
-import { categoryLabel, dateLabel, dateTime, number } from '../lib/format';
+import { categoryLabel, dateLabel, dateTime, number, ratingLabel } from '../lib/format';
 
 export function PassengersPage() {
   const [params, setParams] = useSearchParams();
@@ -152,7 +152,7 @@ export function PassengersPage() {
                         ) : (
                           <span className="row" style={{ gap: 4 }}>
                             <Star size={12} fill="#F2B544" stroke="#F2B544" />
-                            <span className="mono">{row.rating.toFixed(2)}</span>
+                            <span className="mono">{ratingLabel(row.rating)}</span>
                           </span>
                         )}
                       </td>
@@ -282,7 +282,7 @@ export function PassengerDetailPage() {
               {profile?.rating !== null && profile?.rating !== undefined ? (
                 <span className="row" style={{ gap: 4 }}>
                   <Star size={13} fill="#F2B544" stroke="#F2B544" />
-                  {profile.rating.toFixed(2)}
+                  {ratingLabel(profile.rating)}
                 </span>
               ) : (
                 '—'

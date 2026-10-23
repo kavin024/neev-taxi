@@ -35,7 +35,15 @@ import type {
   CaptainRow,
   Paginated,
 } from '../lib/types';
-import { categoryLabel, dateLabel, dateTime, money, number, titleCase } from '../lib/format';
+import {
+  categoryLabel,
+  dateLabel,
+  dateTime,
+  money,
+  number,
+  ratingLabel,
+  titleCase,
+} from '../lib/format';
 
 export function CaptainsPage() {
   const [params, setParams] = useSearchParams();
@@ -194,7 +202,7 @@ export function CaptainsPage() {
                       <td>
                         <div className="row" style={{ gap: 4 }}>
                           <Star size={12} fill="#F2B544" stroke="#F2B544" />
-                          <span className="mono">{captain.rating.toFixed(2)}</span>
+                          <span className="mono">{ratingLabel(captain.rating)}</span>
                           <span className="tiny muted">/ {captain.total_trips} trips</span>
                         </div>
                       </td>
@@ -413,7 +421,7 @@ export function CaptainDetailPage() {
             <div className="detail-name">{data.name}</div>
             <div className="detail-meta">
               <span>
-                <Star size={12} fill="#F2B544" stroke="#F2B544" /> {data.rating.toFixed(2)}
+                <Star size={12} fill="#F2B544" stroke="#F2B544" /> {ratingLabel(data.rating)}
               </span>
               <span>·</span>
               <span>{number(data.total_trips)} lifetime trips</span>
